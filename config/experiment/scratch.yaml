@@ -7,11 +7,23 @@ wandb:
 seed: 1
 model_pars:
   model_dir: ""
-  hf_model_id: "openai/gpt2-medium"
-  hf_tokenizer_id: "openai/gpt2-medium"
+  hf_model_id: "openai-community/gpt2-medium"
+  hf_tokenizer_id: "openai-community/gpt2-medium"
+  num_hidden_layers: 6
+  hidden_size: 16
+  num_attention_heads: 1
+  intermediate_size: 16
 
 resume: false
 method: "scratch"
 
 dataset_pars:
   apply_chat_template: false
+  balance_carries: true
+
+finetuning_pars:
+  num_train_epochs: 100
+  per_device_train_batch_size: 128
+  reference_learning_rate: 2e-5
+  log_n_per_epoch: 100
+  eval_n_per_epoch: 10

@@ -9,8 +9,8 @@ import hydra
 import os
 
 from src.huggingface_callbacks import SaveCheckpointCallback, GreedyDecodeOnce
-from src.dataset import get_datasets
-from src.helpers import log_config
+from src.helpers import log_config, print_example
+from src.dataset import ArithmeticDataset
 
 
 def global_setup(args, wandb_run_id=None):
@@ -77,7 +77,15 @@ def main(args):
             wandb_run_id = f.read().strip()
         global_setup(args, wandb_run_id)
         tokenizer = AutoTokenizer.from_pretrained(args.model_pars.model_dir)
-    train_dataset, eval_dataset = get_datasets(args, tokenizer)
+
+    dataset_class = ArithmeticDataset(seed=args.seed, tokenizer=tokenizer, **args.dataset_pars)
+    train_dataset, eval_dataset = dataset_class.generate_data()
+    logging.info(f"Training set size: {len(train_dataset)}")
+    logging.info(f"Printing training example")
+    print_example(train_dataset[0])
+    logging.info(f"Evaluation set size: {len(eval_dataset)}")
+    logging.info(f"Printing evaluation example")
+    print_example(eval_dataset[0])
 
     effective_batch_size = args.finetuning_pars.per_device_train_batch_size * max(1, args.finetuning_pars.gradient_accumulation_steps) * torch.cuda.device_count()
     steps_per_epoch = len(train_dataset) // effective_batch_size

@@ -25,9 +25,16 @@ model_pars:
   model_dir: ""
   hf_model_id: ???  # Qwen or llama "meta-llama/Llama-3.2-1B-Instruct"
   hf_tokenizer_id: ???
+  num_hidden_layers: 2
+  hidden_size: 96
+  num_attention_heads: 2
+  intermediate_size: 96
 
 dataset_pars:
   apply_chat_template: true
+  num_digits: 3
+  percentage_test: 0.1
+  balance_carries: false
 
 # FT parameters
 finetuning_pars:

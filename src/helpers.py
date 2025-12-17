@@ -6,3 +6,7 @@ def log_config(arguments):
     for argument, value in arguments.items():
         logging.info("{}: {}".format(argument, value))
     logging.info("-" * 50)
+
+def print_example(example):
+    for key, value in example.items():
+        logging.info(f"{key}: {value}")
