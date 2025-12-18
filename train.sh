@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#SBATCH --job-name=planning_arit_bal
+#SBATCH --job-name=planning_arit_bal_hardtest
 #SBATCH --account=lingo
 #SBATCH --partition=lingo-h100
 #SBATCH --qos=lingo-main
 #SBATCH --time=24:00:00 # (hh:mm:ss)
-#SBATCH --output=/data/scratch/lruis/planning_arit_bal.log  # CHANGE THIS
-#SBATCH --error=/data/scratch/lruis/planning_arit_bal.err  # CHANGE THIS
+#SBATCH --output=/data/scratch/lruis/planning_arit_bal_hardtest.log  # CHANGE THIS
+#SBATCH --error=/data/scratch/lruis/planning_arit_bal_hardtest.err  # CHANGE THIS
 #SBATCH --gpus=1
 #SBATCH --mem=80GB
 

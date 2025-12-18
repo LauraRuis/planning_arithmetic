@@ -27,3 +27,4 @@ finetuning_pars:
   reference_learning_rate: 2e-5
   log_n_per_epoch: 100
   eval_n_per_epoch: 10
+  save_n_per_epoch: 0.1

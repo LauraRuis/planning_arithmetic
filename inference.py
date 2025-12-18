@@ -36,7 +36,8 @@ class LLMInference:
         return {
             "prompt": prompt,
             "generated_text": generated_text,
-            "example_id": batch["example_id"]
+            "example_id": batch["example_id"],
+            "ground_truth": batch["ground_truth"]
         }
 
 @hydra.main(version_base=None, config_path="config", config_name="config")
