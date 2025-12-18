@@ -4,6 +4,7 @@ from collections import defaultdict
 import numpy as np
 import random
 import regex
+import json
 
 from src.helpers import compute_pass_at_k
 
@@ -101,6 +102,7 @@ class ArithmeticDataset:
         return accuracy, pass_at_k_scores, all_predictions
     
     def generate_data(self):
+        random.seed(self.seed)
         
         train_dataset = {
             "chat": [],
@@ -179,4 +181,28 @@ class ArithmeticDataset:
             test_dataset = test_dataset.map(lambda x: {"prompt": x["chat"][0]["content"],
                                                        "completion": x["chat"][1]["content"]})
         return train_dataset, test_dataset
+    
+    def save_state(self, save_path):
+        state = {
+            "num_digits": self.num_digits,
+            "percentage_test": self.percentage_test,
+            "apply_chat_template": self.apply_chat_template,
+            "seed": self.seed,
+            "balance_carries": self.balance_carries
+        }
+        with open(save_path, "w") as f:
+            json.dump(state, f)
+    
+    @classmethod
+    def from_state(cls, state_path, tokenizer):
+        with open(state_path, "r") as f:
+            state = json.load(f)
+        return cls(
+            seed=state["seed"],
+            tokenizer=tokenizer,
+            num_digits=state["num_digits"],
+            percentage_test=state["percentage_test"],
+            apply_chat_template=state["apply_chat_template"],
+            balance_carries=state["balance_carries"]
+        )
     

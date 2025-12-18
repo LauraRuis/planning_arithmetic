@@ -1,0 +1,31 @@
+# @package _global_
+
+wandb:
+  group: "sft"
+  log: true
+
+seed: 1
+model_pars:
+  model_dir: "exp/openai-community/gpt2-medium/serene-wildflower-21/checkpoint-96957"
+  hf_model_id: "openai-community/gpt2-medium"
+  hf_tokenizer_id: "openai-community/gpt2-medium"
+
+resume: false
+method: "eval"
+
+dataset_pars:
+  apply_chat_template: false
+  balance_carries: true
+
+eval_pars:
+  num_workers: 1
+  max_to_eval: 100
+  temperature: 0.
+  pass_at_k: 1
+  num_samples: 1
+  max_tokens: 100
+  batch_size: 32
+  tensor_parallel_size: 1
+  pipeline_parallel_size: 1
+  data_parallel_size: 1
+  gpu_memory_utilization: 0.90

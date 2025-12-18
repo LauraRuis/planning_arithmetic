@@ -10,9 +10,9 @@ model_pars:
   hf_model_id: "openai-community/gpt2-medium"
   hf_tokenizer_id: "openai-community/gpt2-medium"
   num_hidden_layers: 6
-  hidden_size: 16
+  hidden_size: 64
   num_attention_heads: 1
-  intermediate_size: 16
+  intermediate_size: 64
 
 resume: false
 method: "scratch"

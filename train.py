@@ -79,6 +79,7 @@ def main(args):
         tokenizer = AutoTokenizer.from_pretrained(args.model_pars.model_dir)
 
     dataset_class = ArithmeticDataset(seed=args.seed, tokenizer=tokenizer, **args.dataset_pars)
+    dataset_class.save_state(os.path.join(output_dir, "dataset_state.json"))
     train_dataset, eval_dataset = dataset_class.generate_data()
     logging.info(f"Training set size: {len(train_dataset)}")
     logging.info(f"Printing training example")

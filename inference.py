@@ -9,7 +9,7 @@ import torch
 import json
 import ray
 
-from src.dataset import get_dataset
+from src.dataset import ArithmeticDataset
 
 
 class LLMInference:
@@ -44,13 +44,22 @@ class LLMInference:
 def main(args):
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_pars.model_dir, fix_mistral_regex=True)
-    dataset = get_dataset(args, tokenizer)
+    model_dir = args.model_pars.model_dir
+    # dataset_state_file = os.path.join(model_dir, "dataset_state.json")
+    # if not os.path.exists(dataset_state_file):
+    #     raise ValueError(f"Dataset state file not found at {dataset_state_file}")
+    # logging.info(f"Loading dataset state from {dataset_state_file}")
+    # dataset_class = ArithmeticDataset.from_state(dataset_state_file, tokenizer=tokenizer)
+    # _, test_data = dataset_class.generate_data()
+    dataset_class = ArithmeticDataset(seed=args.seed, tokenizer=tokenizer, **args.dataset_pars)
+    dataset_class.save_state(os.path.join(os.path.dirname(model_dir), "dataset_state.json"))
+    _, test_data = dataset_class.generate_data()
 
     if args.method == "eval":
         logging.info(f"Evaluating on max {args.eval_pars.max_to_eval} datapoints.")
-        num_datapoints = min(len(dataset), args.eval_pars.max_to_eval)
+        num_datapoints = min(len(test_data), args.eval_pars.max_to_eval)
         # Do inference
-        ray_ds = ray.data.from_pandas(dataset.to_pandas()[:num_datapoints], override_num_blocks=args.eval_pars.num_workers)
+        ray_ds = ray.data.from_pandas(test_data.to_pandas()[:num_datapoints], override_num_blocks=args.eval_pars.num_workers)
         # Get the number of available gpus
         num_gpus = ray.cluster_resources().get("GPU", 0)
         # Print cluster resources
@@ -61,7 +70,7 @@ def main(args):
             batch_size=args.eval_pars.num_samples,
             num_gpus=num_gpus,
             fn_constructor_kwargs={"num_datapoints": num_datapoints, "tokenizer": tokenizer, "vocab_size": len(tokenizer), "model_name_or_path": args.model_pars.model_dir, "max_tokens": args.eval_pars.max_tokens,
-                                    "n": args.eval_pars.num_samples, "temperature": args.eval_pars.temperature, "logging_interval": args.eval_pars.logging_interval,
+                                    "n": args.eval_pars.num_samples, "temperature": args.eval_pars.temperature,
                                     "tensor_parallel_size": args.eval_pars.tensor_parallel_size, "pipeline_parallel_size": args.eval_pars.pipeline_parallel_size,
                                     "data_parallel_size": args.eval_pars.data_parallel_size}
         )
@@ -72,6 +81,17 @@ def main(args):
             os.makedirs(os.path.dirname(output_path), exist_ok=True)
         with open(output_path, "w") as f:
             json.dump(outputs, f, indent=4)
+        
+        logging.info(f"Saved generated outputs to {output_path}")
+        eval_results = dataset_class.eval_outputs(outputs, pass_at_k=args.eval_pars.pass_at_k, is_base_model=args.eval_pars.is_base_model, scratch=args.eval_pars.scratch)
+        logging.info(f"Evaluation results: Accuracy: {eval_results[0]}, Pass@K: {eval_results[1]}")
+        resutls_path = os.path.join(args.model_pars.model_dir, f"eval_results.json")
+        with open(resutls_path, "w") as f:
+            json.dump({
+                "accuracy": eval_results[0],
+                "pass_at_k": eval_results[1],
+                "all_predictions": eval_results[2]
+            }, f, indent=4)
     else:
         raise ValueError(f"Unknown method: {args.method}")
 
